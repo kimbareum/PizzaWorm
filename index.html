@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PizzaWorm</title>
+  <style>
+    body {
+      margin: 0;
+    }
+    canvas {
+      border: 1px solid black;
+    }
+
+    #canvasBg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvasBg" width="300" height="300"></canvas>
+  <canvas id="canvas" width="300" height="300"></canvas>
+  <script src="tile.js"></script>
+  <script src="worm.js"></script>
+  <script src="pizza.js"></script>
+  <script>
+
+    // 게임판
+    const canvas = document.querySelector('#canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 피자가 나타나는 캔버스 배경
+    const canvasBg = document.querySelector('#canvasBg');
+    const ctxBg = canvasBg.getContext('2d');
+
+    // 타일(10 x 10)
+    const tileSize = 10;
+    const cWidth = canvas.width;
+    const cHeight = canvas.height;
+    // 타일의 개수
+    const tileWidth = cWidth/tileSize;
+    const tileHeight = cHeight/tileSize;
+
+    // 애니메이션의 아이디
+    let playId;
+    // 게임오버 플래그
+    let gameOverFlag = false;
+
+    // 점수 초기화
+    let score = 0;
+    // 점수 렌더링
+    const renderScore = () => {
+      ctx.font = '20px Helvetica';
+      ctx.fillStyle = 'black';
+      ctx.textAlign = "left";
+      ctx.fillText(`SCORE : ${score}`, 0, 30);
+    }
+    // 게임오버 렌더링
+    const renderGameOver = () => {
+      cancelAnimationFrame(playId);
+      ctx.font = '30px Helvetica';
+      ctx.fillStyle = 'red';
+      ctx.textBaseLine = "middle";
+      ctx.textAlign = "center";
+      ctx.fillText(`GAME OVER`, cWidth/2, cHeight/2);
+    }
+
+    const worm = new Worm();
+    const pizza = new Pizza();
+
+    // 키 입력
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        worm.checkDirection(e.key);
+      }
+    })
+
+    const playGame = () => {
+      setTimeout(() => {
+          playId = requestAnimationFrame(playGame);
+          ctx.clearRect(0, 0, cWidth, cHeight)
+          worm.moveWorm();
+          pizza.renderPizza();
+          worm.renderWorm();
+          renderScore();
+          // 게임오버 화면을 지렁이 위로 올리기 위해서 flag로 처리.
+          if (gameOverFlag) {
+            renderGameOver();
+          }
+        }, 100);
+    }
+
+    requestAnimationFrame(playGame);
+
+  </script>
+</body>
+</html>
